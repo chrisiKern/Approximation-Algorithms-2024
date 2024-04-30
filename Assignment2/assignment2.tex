@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, mathtools}
+\usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage[ruled, linesnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{dsfont}
+
+\title{Approximation Algorithms - Assignment 2}
+\author{Group 2: Christoph Kern, Johannes Gabriel Sindlinger}
+
+\begin{document}
+
+\maketitle
+
+Taking this colab as a starting point, your task is to compute information about the number of common substrings in Danish and English words. As an example, the word ``po'' has 6 distinct substrings, namely ``'' (the empty string), ``p'', ``o'', ``po'', ``op'' and ``pop''. Note that ``pp'' is not a substring since the letters are not consecutive.
+
+\begin{enumerate}
+    \item Use a hyperloglog data structure with relative error $0.01$ to compute upper and lower bounds on the number of distinct substrings in Danish and English, respectively. You may assume that HLL is guaranteed to return a number with the stated relative error.
+    \item Based on the answer from 1), and a cardinality estimate for the union, give upper and lower bounds on the number of common substrings in the two languages. (NB! The lower bound is not necessarily positive.)
+    \item (Theory.) Suppose that the intersection size is at least $1\%$ of each of the two sets. How small relative error on the cardinality estimates would you need to estimate the number of common substrings up to a relative error of $10\%$? (NB! The implementation provided does not support very small relative errors.)
+    
+\end{enumerate}
+
+
+\end{document}
