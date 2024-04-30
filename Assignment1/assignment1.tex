@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, mathtools}
+\usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage[ruled, linesnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{dsfont}
+
+\title{Approximation Algorithms - Assignment 1}
+\author{Group 2: Christoph Kern, Johannes Gabriel Sindlinger}
+
+\begin{document}
+
+\maketitle
+
+We consider \emph{random sampling} as described in CY algorithm 2.4. Suppose that a sample of size $s$ is taken from a set of $N \gg s$ elements, where \texttt{Initialize} is run on $x_1,\dots,x_s$ and the \texttt{Update} is run on elements $x_{s+1},\dots,x_N$, one at a time in this order.
+
+\begin{enumerate}
+    \item Show that the probability that tow particular elements $x_i,x_j,i\not=j$ are both in the sample after the final \texttt{Update} is $\frac{s}{N} \cdot \frac{s-1}{N-1}$.
+
+    \begin{proof}
+        Random sampling can be conceptualized as a random shuffle of all $N$ elements and taking the first $s$ elements. We aim to count the number of permutations where $x_i$ and $x_j$ are within the first $s$ elements:
+        \begin{itemize}
+            \item First, we can choose from $s$ possible positions for $x_i$.
+            \item For each choice of $x_i$, we are left with $s-1$ possible positions for $x_j$.
+            \item For each choice of $x_i$ and $x_j$, we have $(N-2)!$ possible permutations of the remaining elements.
+        \end{itemize}
+        $\Rightarrow$ $s (s-1) (N-2)!$ permutations. 
+
+        As we have $N!$ possible permutations in total, we end up with following probability for $x_i$ and $x_j$ being in the sample:
+        \[
+            \frac{s (s-1) (N-2)!}{N!} = \frac{s (s-1) (N-2)!}{N(N-1)(N-2)!} = \frac{s (s-1)}{N(N-1)} = \frac{s}{N} \cdot \frac{s-1}{N-1}
+        \]
+    \end{proof}
+
+    
+    \item Argue that the events that $x_i$ is sampled is \emph{not} independent of the event that $x_j$ is sampled.
+
+    \begin{proof}
+        In short terms: Sampling $x_j$ can result in $x_i$ being replaced by $x_j$, thus the events are not independent.
+
+        More mathematically: Let $S$ be the final sample subset and $x_i$, $x_j$ two arbitrary but fixed items of the whole set. 
+        If the two events, $x_i$ is sampled and $x_j$ is sampled, were independent, then it would follow:
+        \[
+        \mathbb{P}(x_i \in S \cap x_j \in S) = \mathbb{P}(x_i \in S)\mathbb{P}(x_j \in S)
+        \]
+        Based on the explanations of the first subtask and the explanation from the lecture notes, it follows that the probability that an arbitrary item $x_k$ is in $S$ is given by
+        \[
+        \mathbb{P}(x_k \in S) = \frac{s}{N}
+        \]
+        In particular: 
+        \[
+        \mathbb{P}(x_i \in S) \cdot \mathbb{P}(x_j \in S) = (\frac{s}{N})^2
+        \]
+        It follows based on the derivation of subtask 1:
+        \[\mathbb{P}(x_i \in S \cap x_j \in S) \stackrel{1.}{=} \frac{s}{N} \cdot \frac{s-1}{N-1} \neq (\frac{s}{N})^2 = \mathbb{P}(x_i \in S) \cdot \mathbb{P}(x_i \in S) 
+        \]
+        Therefore the two events cannot be independent.
+    \end{proof}
+
+    
+    \item Show that the expected number of times that $S$ is updated in line 3 is $\mathcal{O}(s \log N)$.
+
+    \begin{proof}
+        \begin{align}
+            &\mathbb{E}\left[\sum^N_{n=s} \mathds{1}(i \le s)\right] \label{eq:line1}\\
+            &= \sum^N_{n=s} \mathbb{E}\left[\mathds{1}(i \le s)\right] \label{eq:line2}\\
+            &= \sum^N_{n=s} \frac{s}{n} = s \sum^N_{n=s} \frac{1}{n} \le s \sum^N_{n=1} \frac{1}{n}\label{eq:line3}\\
+            &= s \cdot \mathcal{O}(\log N) = \mathcal{O}(s \log N)\label{eq:line4}
+        \end{align}
+
+        \begin{itemize}
+            \item Line~\ref{eq:line1}: To compute the expected number of times that $S$ is updated we introduce a sum of indicator variables. In each summand the indicator variable is $1$ if $i \in \text{Unif}(1,n)$ is less than $s$, otherwise $0$.
+            \item Line~\ref{eq:line2}: Apply linearity of expectation
+            \item Line~\ref{eq:line3}: Apply the fact that $\mathbb{E}\left[\mathds{1}(i \le s)\right] = \mathbb{P}(i \le s) = \frac{s}{n}$.
+            \item Line~\ref{eq:line4}: Apply the fact that $\sum^N_{n=1} \frac{1}{n}$ is approximately $\log N$.
+        \end{itemize}
+    \end{proof}
+    
+\end{enumerate}
+
+
+\end{document}
