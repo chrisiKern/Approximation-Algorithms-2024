@@ -16,13 +16,38 @@
 
 \maketitle
 
-Taking this colab as a starting point, your task is to compute information about the number of common substrings in Danish and English words. As an example, the word ``po'' has 6 distinct substrings, namely ``'' (the empty string), ``p'', ``o'', ``po'', ``op'' and ``pop''. Note that ``pp'' is not a substring since the letters are not consecutive.
+Taking this colab as a starting point, your task is to compute information about the number of common substrings in Danish and English words. As an example, the word ``pop'' has 6 distinct substrings, namely ``'' (the empty string), ``p'', ``o'', ``po'', ``op'' and ``pop''. Note that ``pp'' is not a substring since the letters are not consecutive.
 
 \begin{enumerate}
     \item Use a hyperloglog data structure with relative error $0.01$ to compute upper and lower bounds on the number of distinct substrings in Danish and English, respectively. You may assume that HLL is guaranteed to return a number with the stated relative error.
     \item Based on the answer from 1), and a cardinality estimate for the union, give upper and lower bounds on the number of common substrings in the two languages. (NB! The lower bound is not necessarily positive.)
     \item (Theory.) Suppose that the intersection size is at least $1\%$ of each of the two sets. How small relative error on the cardinality estimates would you need to estimate the number of common substrings up to a relative error of $10\%$? (NB! The implementation provided does not support very small relative errors.)
-    
+
+    \begin{proof}
+        Since we have an intersection size of at least $1\%$, we have
+        \begin{align}
+            |A \cap B| \ge 0.01 \cdot |A \cup B|
+        \end{align}
+        The absolute error of $|A \cap B|$ is
+        \begin{align}
+            \epsilon|A| + \epsilon|B| + \epsilon|A \cup B| = \epsilon(|A| + |B| + |A \cup B|)
+        \end{align}
+        Since we allow a relative error up to $10\%$ for the common substrings, we have
+        \begin{align}
+            0.1 &\ge \frac{\epsilon(|A| + |B| + |A \cup B|)}{|A \cap B|}
+        \end{align}
+        With this, we can computer an upper bound on $\epsilon$:
+        \begin{align}
+              \epsilon &\le \frac{0.1 \cdot |A \cap B|}{|A| + |B| + |A \cup B|}\\
+              &= \frac{0.1 \cdot |A \cap B|}{2 \cdot |A \cup B| - |A \cap B|}\\
+              &\le \frac{0.1 \cdot 0.01 \cdot |A \cup B|}{2 \cdot |A \cup B| - 0.01 \cdot |A \cup B|}\\
+              &= \frac{0.001 \cdot |A \cup B|}{1.99 \cdot |A \cup B|}\\
+              &= \frac{0.001}{1.99} = 0.00199
+        \end{align}
+
+        Thus, the relative error on the cardinality estimates would need to at most $0.199\%$.
+
+    \end{proof}
 \end{enumerate}
 
 
