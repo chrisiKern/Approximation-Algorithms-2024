@@ -9,23 +9,132 @@
 \usepackage{subcaption}
 \usepackage{dsfont}
 \usepackage{pythonhighlight}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{xurl}
+
+% Define colors for syntax highlighting
+\definecolor{codegreen}{rgb}{0.2,0.6,0.2}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+% Sensible defaults for lstlistings
+\lstset{
+numberstyle=\tiny\color{codegray},
+backgroundcolor=\color{backcolour},   
+  basicstyle=\footnotesize\ttfamily,
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  commentstyle=\bfseries\color{purple!40!black}
+  frame=L,
+  identifierstyle=\color{blue},
+  keywordstyle=\bfseries\color{green!40!black},
+  language=python,
+  showstringspaces=false,
+  stringstyle=\color{orange},
+  xleftmargin=\parindent,
+  captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    framexleftmargin=16pt,
+    framextopmargin=6pt,
+        framexbottommargin=6pt, 
+        frame=tb, framerule=0pt,
+}
+
 
 \title{Approximation Algorithms - Assignment 2}
 \author{Group 2: Christoph Kern, Johannes Gabriel Sindlinger}
 
+
 \begin{document}
 
 \maketitle
+
+\begin{center}
+    \textbf{Github-Link:} \\
+\url{https://github.com/chrisiKern/Approximation-Algorithms-2024/blob/main/Assignment2/assignment2.ipynb}
+\end{center}
+
 
 Taking this colab as a starting point, your task is to compute information about the number of common substrings in Danish and English words. As an example, the word ``pop'' has 6 distinct substrings, namely ``'' (the empty string), ``p'', ``o'', ``po'', ``op'' and ``pop''. Note that ``pp'' is not a substring since the letters are not consecutive.
 
 \begin{enumerate}
     \item Use a hyperloglog data structure with relative error $0.01$ to compute upper and lower bounds on the number of distinct substrings in Danish and English, respectively. You may assume that HLL is guaranteed to return a number with the stated relative error.
 
-    \emph{Solution.} 
+    \emph{Solution.} The following code snippet shows our solution to the described problem by generating all potential substrings for each occurring word in the given file and inserting them into the hyperloglog structure. The results we obtained were the following:
+    \begin{itemize}
+        \item \textbf{Distinct substrings in Danish:} [410319, 418608]
+        \item \textbf{Distinct substrings in English:} [3889578, 3968155]
+    \end{itemize}
+
+    \begin{lstlisting}
+def create_hll_substrings(filename, relative_error):
+    hll = hyperloglog.HyperLogLog(relative_error)
+    with open(filename, 'r') as f:
+    for word in f:
+        n = len(word)
+        for i in range(n):
+            for j in range(i + 1, n + 1):
+                hll.add(word[i:j])
+    return hll
+    
+def print_statistics(estimate, absolute_error, text):
+    print(f"{estimate} {text} [{estimate - absolute_error}, {estimate + absolute_error}]")
+
+relative_error = 0.01
+
+hll_danish_substrings = create_hll_substrings('words_danish.txt', relative_error)
+danish_substrings_estimate = len(hll_danish_substrings)
+danish_substrings_absolute_error = relative_error * danish_substrings_estimate
+print_statistics(danish_substrings_estimate, danish_substrings_absolute_error, "Danish substrings")
+
+hll_english_substrings = create_hll_substrings('words_english.txt', relative_error)
+english_substrings_estimate = len(hll_english_substrings)
+english_substrings_absolute_error = relative_error * english_substrings_estimate
+print_statistics(english_substrings_estimate, english_substrings_absolute_error, "English substrings")
+\end{lstlisting}
     
     
     \item Based on the answer from 1), and a cardinality estimate for the union, give upper and lower bounds on the number of common substrings in the two languages. (NB! The lower bound is not necessarily positive.)
+
+    \emph{Solution.} Let $A$ be the set of Danish substrings and $B$ the set of English substrings. Then the number of common substrings $|A \cap B|$ can be computed as follows:
+    \[
+        |A \cap B| = |A| + |B| - |A \cup B|
+    \]
+
+   Therefore, our solution is based on using a hyperloglog structure to estimate not only the cardinalities of the sets $A$ and $B$ but also the cardinality of the set $A \cup B$ and thus to calculate the number of distinct elements of $A \cap B$. 
+   
+    However, the error of the three different hyperloglog structures of $A, B$ and $A \cap B$ must be taken into account. In the worst case, the absolute error consists of a summation of the errors of three different estimates, i.e. the absolute error of $|A \cap B|$ can be defined as the sum of absolute errors of the individual summands:
+    \[
+        \epsilon |A \cap B| \leq \epsilon |A| + \epsilon |B| + \epsilon |A \cup B|
+    \]
+
+    The following code snippet shows the application of the described procedure. The results are:
+    \begin{itemize}
+        \item Distinct substrings in the union ($A \cup B$): [4249088, 4334928]
+        \item \textbf{Distinct substrings in the intersection ($A \cap B$)}: [-35030, 137676]
+    \end{itemize}
+
+    \begin{lstlisting}
+hll_combined_substrings = copy.deepcopy(hll_english_substrings)
+hll_combined_substrings.update(hll_danish_substrings)
+combined_substrings_estimate = len(hll_combined_substrings)
+combined_substrings_absolute_error = relative_error * combined_substrings_estimate
+print_statistics(combined_substrings_estimate, combined_substrings_absolute_error, "combined substrings")
+
+common_substrings_estimate = english_substrings_estimate + danish_substrings_estimate - combined_substrings_estimate
+common_substrings_absolute_error = english_substrings_absolute_error + danish_substrings_absolute_error + combined_substrings_absolute_error
+print_statistics(common_substrings_estimate, common_substrings_absolute_error, "common substrings")
+\end{lstlisting}
+    
     \item (Theory.) Suppose that the intersection size is at least $1\%$ of each of the two sets. How small relative error on the cardinality estimates would you need to estimate the number of common substrings up to a relative error of $10\%$? (NB! The implementation provided does not support very small relative errors.)
 
     \begin{proof}
