@@ -92,18 +92,17 @@ We consider scheduling jobs on identical machines as in Section 2.3, but jobs ar
 The Wikipedia article on TSP claims that it is possible to solve TSP in the setting where distances are asymmetric, by reducing this to the standard (symmetric) case. In the reduction some vertices that have "no edges" between them; you can think of this as having infinite (or very large) weight. Explain how to choose the value $w$ and argue that the reduction is correct.  Why does this reduction not imply a $\frac{3}{2}$-approximation for the asymmetric TSP?
 
 \begin{proof}
-    We aim to show that the reduction is correct. Let $G=(V,E)$ be the original complete graph ($|V| = n$) and $G'=(V',E')$ the reduced graph, such that
-    \begin{align*}
-        V' &= \{v_i, v_i'\ |\ v_i \in V\}\\
-        E' &= V' \times V'
-    \end{align*}
-    This creates a mirrored set of vertices of the original vertices, which we refer to as ghost vertices (indicate by $'$). The vertices between an original vertex $v_i \in V'$ and its corresponding ghost vertex $v_i' \in V'$ will be referred to as a ghost edges. 
+    We aim to show that the reduction is correct. Let $G=(V,E)$ be the original complete graph ($|V| = n$). The reduced graph $G'=(V',E')$ is a complete graph where we mirror each vertex in $V$, i.e.
+    \[
+        V' = \{v_i, v_i'\ |\ v_i \in V\}
+    \]
+    We refer to the mirrored vertices as ghost vertices (indicate by $'$). The vertices between an original vertex $v_i \in V'$ and its corresponding ghost vertex $v_i' \in V'$ will be referred to as a ghost edges. 
 
     The asymmetric weights $w_{v_i \to v_j}$ of $G$ will be mapped to symmetric weights in our constructed graph as follows:
     \[
         w_e = \begin{cases}
-            w_{v_i \to v_j} & \text{if }e = (v_i', v_j)\\
-            w & \text{if }e = (v_i, v_i')\\
+            w_{v_i \to v_j} & \text{if }e = \{v_i', v_j\}\\
+            w & \text{if }e = \{v_i, v_i'\}\\
             \infty & \text{otherwise}
         \end{cases} \text{ for every } e \in E'
     \]
@@ -125,45 +124,25 @@ The Wikipedia article on TSP claims that it is possible to solve TSP in the sett
         
         We can then merge all regular vertices with its corresponding ghost vertex in the tour which results in a tour $C$ for $G$, where the edges have the same weight as in $C'$. Since $\text{cost}(C) = \text{cost}(C') - n \cdot w$, we have $\text{cost}(C) \le d$.
 
-        Finally, suppose the tour $C'$ does not contain the ghost edge $(v_i, v_i')$. We will now show how to construct a tour $C''$ of $G$ from $C'$ which contains the ghost edge $(v_i, v_i')$ such that $\text{cost}(C'') \le \text{cost}(C')$. This procedure can then be applied for every ghost edge, which allows us to use the above construction for a tour $C$ in $G$, resulting in $\text{cost}(C) \le d$.
+        Finally, suppose the tour $C'$ does not contain the ghost edge $\{v_i, v_i'\}$. We will now show how to construct a tour $C''$ of $G$ from $C'$ which contains the ghost edge $\{v_i, v_i'\}$ such that $\text{cost}(C'') \le \text{cost}(C')$. This procedure can then be applied for every ghost edge, which allows us to use the above construction for a tour $C$ in $G$, resulting in $\text{cost}(C) \le d$.
 
         \begin{figure}
             \centering
             \includegraphics{Assignment3/figures.pdf}
-            \caption{Caption}
+            \caption{Process of adding ghost edge to tour}
             \label{fig:no_ghost}
         \end{figure}
 
-        %First of all, since all vertices must be part of the tour $C'$, and by assumption we only have alternating original and ghost vertices, there exist two ghost vertices $v_a'$ and $v_b'$, and two original vertices $v_c$ and $v_d$, such that the tour looks as follows:
-        %\[
-         %   C' = v_i \to v_b' \to X \to v_c \to v_i' \to v_d \to Y \to v_a' \to v_i
-        %\]
-        
-        
-        %The left side of Figure~\ref{fig:no_ghost} shows an example of such a scenario. We now modify $C'$ as follows:
-
-
-        W.l.o.g.~let the $C'$ start with vertex $v_i$, such that
+        W.l.o.g.~let $C'$ start with vertex $v_i$, such that
         \[
             C' = v_i \to X \to v_i' \to Y \to v_i
         \]
-        where $X$ and $Y$ are two vertex disjoint paths. Since the vertices alternate between original and ghost vertex, it must be that $X$ starts with some ghost vertex $v_a'$ and ends with some original vertex $v_b$, whereas $Y$ must start with some original vertex $v_c$ and end with some ghost vertex $v_d'$. Let $X'$ be the path obtained from reverseing $X$, then we can construct $C''$ as follows:
+        where $X$ and $Y$ are two vertex disjoint paths. Since the vertices alternate between original and ghost vertex, it must be that $X$ starts with some ghost vertex $v_a'$ and ends with some original vertex $v_b$, whereas $Y$ must start with some original vertex $v_c$ and end with some ghost vertex $v_d'$. Let $X'$ be the path obtained from reversing $X$, then we construct $C''$ as follows:
          \[
             C'' = v_i \to v_i' \to X' \to Y \to v_i
         \]
-        
-        
-        \begin{itemize}
-            \item 
-        \end{itemize}
-
-        
-
-        
+        Figure~\ref{fig:no_ghost} demonstrates this visually. Notice that the resulting tour still has alternating original and ghost vertices. Observe that we remove edges $\{v_i, v_a'\}$ and $\{v_i', v_c\}$, but add the ghost edge $\{v_i, v_i'\}$ and edge $\{v_a', v_c\}$. Thus, $cost(C'') \le cost(C')$ iff $w_{a \to c} + w \le w_{a \to i} + w_{i \to c}$. Consequently, $w \le w_{a \to i} + w_{i \to c} - w_{a \to c}$ must hold. Note that if the triangle inequality holds, i.e.~$w_{a \to c} \le w_{a \to i} + w_{i \to c}$, then $w=0$ would suffice. Otherwise, we need to consider every set of 3 vertices in $V'$, and use this to bound $w$.
     \end{itemize}
-    
-   
-
-
+    Now that we have shown the correctness of the reduction, we now want to argue why this does not imply a $\frac{3}{2}$-approximation for the asymmetric TSP. We observe that the constructed graph $G'$ is not metric as the triangle inequality does not hold. Consider a set of three vertices of $G'$ consisting of two original vertices $v_i, v_j$ and one ghost vertex $v_k'$. Then $w_{\{v_i, v_j\}} \le w_{\{v_i, v_k'\}} + w_{\{v_k', v_j\}}$ may not hold, since $w_{\{v_i, v_j\}}$ is infinite and $w_{\{v_i, v_k'\}}$ and $w_{\{v_k', v_j\}}$ are usually finite. Since the demonstrated approximation scheme needs the TSP problem to be metric, this does not imply a $\frac{3}{2}$-approximation.
 \end{proof}
 \end{document}
