@@ -114,7 +114,7 @@ print_statistics(english_substrings_estimate, english_substrings_absolute_error,
    
     However, the error of the three different hyperloglog structures of $A, B$ and $A \cap B$ must be taken into account. In the worst case, the absolute error consists of a summation of the errors of three different estimates, i.e. the absolute error of $|A \cap B|$ can be defined as the sum of absolute errors of the individual summands:
     \[
-        \epsilon |A \cap B| \leq \epsilon |A| + \epsilon |B| + \epsilon |A \cup B|
+     \epsilon |A| + \epsilon |B| + \epsilon |A \cup B|
     \]
 
     The following code snippet shows the application of the described procedure. The results are:
