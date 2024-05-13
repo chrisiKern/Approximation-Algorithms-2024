@@ -127,12 +127,17 @@ The Wikipedia article on TSP claims that it is possible to solve TSP in the sett
 
         Finally, suppose the tour $C'$ does not contain the ghost edge $(v_i, v_i')$. We will now show how to construct a tour $C''$ of $G$ from $C'$ which contains the ghost edge $(v_i, v_i')$ such that $\text{cost}(C'') \le \text{cost}(C')$. This procedure can then be applied for every ghost edge, which allows us to use the above construction for a tour $C$ in $G$, resulting in $\text{cost}(C) \le d$.
 
-        \begin{figure}[]
+        \begin{figure}
             \centering
             \includegraphics{Assignment3/figures.pdf}
             \caption{Caption}
-            \label{fig:enter-label}
+            \label{fig:no_ghost}
         \end{figure}
+
+        First of all, since all vertices must be part of the tour, and by assumption we only have alternating original and ghost vertices, $v_i$ must be proceeded by some ghost vertex $v_a' \in V'$ and followed by some ghost vertex $v_b' \in V'$, whereas $v_i'$ must be proceeded by some original vertex $v_d \in V'$ and followed by some original vertex $v_c \in V'$. The left side of Figure~\ref{fig:no_ghost} shows an example of such a scenario. We now modify $C'$ as follows:
+        \begin{itemize}
+            \item 
+        \end{itemize}
 
         
 
