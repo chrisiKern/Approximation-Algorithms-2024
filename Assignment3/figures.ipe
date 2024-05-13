@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.24">
-<info created="D:20240513111043" modified="D:20240513142555"/>
+<info created="D:20240513111043" modified="D:20240513145158"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -332,10 +332,10 @@ h
 96 704 m
 64 672 l
 </path>
-<text matrix="1 0 0 1 -52 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.649" height="7.493" depth="2.46" valign="baseline" style="math">v_a&apos;</text>
-<text matrix="1 0 0 1 -68 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.831" height="7.491" depth="2.82" valign="baseline" style="math">v_b&apos;</text>
-<text matrix="1 0 0 1 44 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.475" height="4.294" depth="1.49" valign="baseline" style="math">v_d</text>
-<text matrix="1 0 0 1 60 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.888" height="4.294" depth="1.49" valign="baseline" style="math">v_c</text>
+<text matrix="1 0 0 1 -52 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.475" height="7.491" depth="2.82" valign="baseline" style="math">v_d&apos;</text>
+<text matrix="1 0 0 1 -68 12" transformations="translations" pos="120 664" stroke="black" type="label" width="9.649" height="7.493" depth="2.46" valign="baseline" style="math">v_a&apos;</text>
+<text matrix="1 0 0 1 44 76" transformations="translations" pos="120 664" stroke="black" type="label" width="8.888" height="4.294" depth="1.49" valign="baseline" style="math">v_c</text>
+<text matrix="1 0 0 1 60 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.831" height="4.294" depth="1.49" valign="baseline" style="math">v_b</text>
 <path stroke="black" rarrow="normal/normal">
 144 704 m
 176 672 l
@@ -360,10 +360,10 @@ h
 368 736 m
 256 672 l
 </path>
-<text matrix="1 0 0 1 140 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.649" height="7.493" depth="2.46" valign="baseline" style="math">v_a&apos;</text>
-<text matrix="1 0 0 1 124 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.831" height="7.491" depth="2.82" valign="baseline" style="math">v_b&apos;</text>
-<text matrix="1 0 0 1 236 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.475" height="4.294" depth="1.49" valign="baseline" style="math">v_d</text>
-<text matrix="1 0 0 1 252 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.888" height="4.294" depth="1.49" valign="baseline" style="math">v_c</text>
+<text matrix="1 0 0 1 140 76" transformations="translations" pos="120 664" stroke="black" type="label" width="9.475" height="7.491" depth="2.82" valign="baseline" style="math">v_d&apos;</text>
+<text matrix="1 0 0 1 124 12" transformations="translations" pos="120 664" stroke="black" type="label" width="9.649" height="7.493" depth="2.46" valign="baseline" style="math">v_a&apos;</text>
+<text matrix="1 0 0 1 236 76" transformations="translations" pos="120 664" stroke="black" type="label" width="8.888" height="4.294" depth="1.49" valign="baseline" style="math">v_c</text>
+<text matrix="1 0 0 1 252 12" transformations="translations" pos="120 664" stroke="black" type="label" width="8.831" height="4.294" depth="1.49" valign="baseline" style="math">v_b</text>
 <path stroke="black" dash="dotted">
 96 704 m
 144 704 l
@@ -427,5 +427,9 @@ h
 193.854 629.594
 176 672 c
 </path>
+<text matrix="1 0 0 1 -4 -8" transformations="translations" pos="120 632" stroke="black" type="label" width="9.036" height="6.808" depth="0" valign="baseline" style="math">X</text>
+<text matrix="1 0 0 1 188 -8" transformations="translations" pos="120 632" stroke="black" type="label" width="9.036" height="6.808" depth="0" valign="baseline" style="math">X</text>
+<text matrix="1 0 0 1 -4 144" transformations="translations" pos="120 632" stroke="black" type="label" width="7.998" height="6.808" depth="0" valign="baseline" style="math">Y</text>
+<text matrix="1 0 0 1 188 144" transformations="translations" pos="120 632" stroke="black" type="label" width="7.998" height="6.808" depth="0" valign="baseline" style="math">Y</text>
 </page>
 </ipe>
