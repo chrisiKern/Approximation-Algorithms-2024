@@ -134,7 +134,25 @@ The Wikipedia article on TSP claims that it is possible to solve TSP in the sett
             \label{fig:no_ghost}
         \end{figure}
 
-        First of all, since all vertices must be part of the tour, and by assumption we only have alternating original and ghost vertices, $v_i$ must be proceeded by some ghost vertex $v_a' \in V'$ and followed by some ghost vertex $v_b' \in V'$, whereas $v_i'$ must be proceeded by some original vertex $v_d \in V'$ and followed by some original vertex $v_c \in V'$. The left side of Figure~\ref{fig:no_ghost} shows an example of such a scenario. We now modify $C'$ as follows:
+        %First of all, since all vertices must be part of the tour $C'$, and by assumption we only have alternating original and ghost vertices, there exist two ghost vertices $v_a'$ and $v_b'$, and two original vertices $v_c$ and $v_d$, such that the tour looks as follows:
+        %\[
+         %   C' = v_i \to v_b' \to X \to v_c \to v_i' \to v_d \to Y \to v_a' \to v_i
+        %\]
+        
+        
+        %The left side of Figure~\ref{fig:no_ghost} shows an example of such a scenario. We now modify $C'$ as follows:
+
+
+        W.l.o.g.~let the $C'$ start with vertex $v_i$, such that
+        \[
+            C' = v_i \to X \to v_i' \to Y \to v_i
+        \]
+        where $X$ and $Y$ are two vertex disjoint paths. Since the vertices alternate between original and ghost vertex, it must be that $X$ starts with some ghost vertex $v_a'$ and ends with some original vertex $v_b$, whereas $Y$ must start with some original vertex $v_c$ and end with some ghost vertex $v_d'$. Let $X'$ be the path obtained from reverseing $X$, then we can construct $C''$ as follows:
+         \[
+            C'' = v_i \to v_i' \to X' \to Y \to v_i
+        \]
+        
+        
         \begin{itemize}
             \item 
         \end{itemize}
