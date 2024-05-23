@@ -189,7 +189,24 @@ Considering additionally the objective function value of the rounded solutions, 
 
 There are also several instances where we actually found the optimal solution. This is the case when the value of LP-relaxation matches the value of the rounded solution. For \lstinline|star.txt| this was the case for both the formulation with the triangle constraints and without. Furthermore, we also found the optimal solution for \lstinline|routes.txt|, \lstinline|cycles.txt|, and \lstinline|karate.txt| with the help of the additional constraints. 
 
-As an example where the additional constraints significantly improved the solution (and actually enabled us to find the optimal solution), was \lstinline|routes.txt|. Looking at the solution, 
+As an example where the additional constraints significantly improved the solution (and actually enabled us to find the optimal solution), was \lstinline|routes.txt|, shown in Figure~\ref{fig:routes}. We can see that it contains a lot of triangles, thus a lot of triangle constraints were added.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\linewidth]{Assignment4/routes.pdf}
+    \caption{Visualization of the graph \lstinline|routes.txt|}
+    \label{fig:routes}
+\end{figure}
+
+\begin{lstlisting}
+Without triangle constraints:
+	- Solution: {'JFK': 0.5, 'MCO': 0.5, 'ATL': 0.5, 'ORD': 0.5, 'HOU': 0.5, 'DEN': 0.5, 'DFW': 0.5, 'PHX': 0.5, 'LAS': 0.5, 'LAX': 0.5}
+	- Rounded: {'JFK': 1, 'MCO': 1, 'ATL': 1, 'ORD': 1, 'HOU': 1, 'DEN': 1, 'DFW': 1, 'PHX': 1, 'LAS': 1, 'LAX': 1}
+With triangle constraints:
+	- Solution: {'JFK': 0.0, 'MCO': 1.0, 'ATL': 1.0, 'ORD': 1.0, 'HOU': 0.0, 'DEN': -0.0, 'DFW': 1.0, 'PHX': 1.0, 'LAS': 1.0, 'LAX': 0.0}
+	- Rounded: {'JFK': 0, 'MCO': 1, 'ATL': 1, 'ORD': 1, 'HOU': 0, 'DEN': 0, 'DFW': 1, 'PHX': 1, 'LAS': 1, 'LAX': 0}
+
+\end{lstlisting}
 
 
 
