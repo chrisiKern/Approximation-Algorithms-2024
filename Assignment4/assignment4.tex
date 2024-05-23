@@ -74,13 +74,18 @@ Let $G=(V,E)$ be some arbitrary graph and let $S$ be some vertex cover of $G$. N
 \end{itemize}
 
 In any case, we have two vertices of $\{v_1, v_2, v_3\}$ in $S$. Since this was an arbitrary triangle in an arbitrary graph, it holds in general that two vertices of any triangle must be included in the vertex cover. Therefore, we can add this additional constraint to our IP formulation without removing feasible solutions.
-\vspace{2.5em}
+\vspace{3em}
 
 \noindent\fbox{\begin{minipage}{0.98\textwidth}
     \textbf{Task 2}\\
     Write code to add these constraints to the existing ones. You can modify the existing Python code, or build your own implementation from scratch in another language.
 \end{minipage}}
 \vspace{1em}
+
+Given a graph $G=(V,E)$ with a list of triangles $T \subseteq V^3$, we will add the following triangle constraints to the formulation:
+\[
+    v_1 + v_2 + v_3 \ge 2\quad\quad\forall (v_1, v_2, v_3) \in T 
+\]
 
 We will use the original \lstinline|APX| wrapper class to load the example graphs and use the LP implementation. In order to determine the degree of a vertex or to test if an edge is in the graph, we will use the graph data structure provided by \lstinline|NetworkX|. The following function \lstinline|load_graph| loads a graph into memory:
 
@@ -91,6 +96,7 @@ def load_graph(filename):
     graph.add_edge(*e)
   return graph
 \end{lstlisting}
+\vspace{0.5em}
 
 We will also use the same mechanism for rounding the solution as in the provided python code. For better readability, we moved this segment into its own function \lstinline|round_solution|:
 
@@ -103,6 +109,7 @@ def round_solution(solution):
         rounded_value += r
     return rounded_value, rounded_solution
 \end{lstlisting}
+\vspace{0.5em}
 
 Finally, the function \lstinline|vertex_cover_lp| creates the LP-relaxation of the integer program intended to solve the vertex cover problem for the given graph. With the flag \lstinline|triangle_constraints|, we can decide whether we want to add the suggested triangle constraints to the formulation or not. The triangles are computed using the \textsc{MinBucket} algorithm described by \citet{Berry15}. The implementation of \lstinline|vertex_cover_lp| looks as follows:
 
@@ -132,15 +139,19 @@ def vertex_cover_lp(graph, triangle_constraints=False):
   lp.set_objective(objective)
   return lp
 \end{lstlisting}
+\vspace{0.5em}
 
+
+Some details to the inner workings of this function:
 \begin{itemize}
     \item Lines 2-4: Initialize the LP, create a dictionary for storing the buckets, and create a dictionary that represents the objective. 
-    \item Lines 6-8: Creates the objective function and creates an empty bucket for each vertex.
-    \item Lines 10-15: Creates constraint that expresses that for each edge $\{u,v\}$, at least one endpoint must be in the vertex cover. Furthermore, if $d_u \le d_v$, we add $v$ to the bucket of $u$, otherwise we add $u$ the the bucket of $v$.
-    \item Lines 17-21: If we decide to add the triangle constraints, for each bucket we look at each wedge and check whether there is an edge completing the triangle. If a triangle is found, we add a constraint that expresses that at least two of the vertices of the triangle must be in the vertex cover. 
+    \item Lines 6-8: Defines the objective function and creates an empty bucket for each vertex.
+    \item Lines 10-15: Creates constraints that express that for each edge $\{u,v\}$, at least one endpoint must be in the vertex cover. Furthermore, if $d_u \le d_v$, we add $v$ to the bucket of $u$, otherwise we add $u$ the the bucket of $v$.
+    \item Lines 17-21: If we decide to add the triangle constraints, for each bucket we look at each wedge contained in it (path of length two) and check whether there is an edge completing the triangle. If a triangle is found, we add a constraint that expresses that at least two of the vertices of the triangle must be in the vertex cover. 
 \end{itemize}
 
 To finally test the implementation on all provided example graphs, we run following code with some additional print statements (not shown here):
+
 \begin{lstlisting}
 for filename in DataFile.graph_files:
   graph = load_graph(filename)
@@ -153,9 +164,10 @@ for filename in DataFile.graph_files:
   value_t, solution_t = lp_t.solve()
   rounded_value_t, rounded_solution_t = round_solution(solution_t)
 \end{lstlisting}
+\vspace{0.5em}
 
 The full implementation can be found on \url{https://github.com/chrisiKern/Approximation-Algorithms-2024/blob/main/Assignment4/Vertex_cover.ipynb}.
-\vspace{2.5em}
+\vspace{3em}
 
 \noindent\fbox{\begin{minipage}{0.98\textwidth}
     \textbf{Task 3}\\
@@ -185,30 +197,25 @@ Recall that the solution of the LP-relaxation of the integer program expressing 
 
 First, let us consider the obtained objective function values of the LP-relaxation with and without the triangle constraints, i.e.~lower bounds of the optimal solution. As expected, the formulation with the triangle constraints gives us a tighter lower bound than the formulation without them for almost all graphs. Only for \lstinline|petersen.txt|, \lstinline|petersenstar.txt|, and \lstinline|star.txt| there is no improvement. However, this is not surprising as neither of these graphs contain triangles. Thus, the LP formulations are identical and, therefore, we obtain identical results.
 
-Considering additionally the objective function value of the rounded solutions, we also see significant improvements for the formulation with triangle constraints over the original version. Apart from the instance above, only \lstinline|clique.txt| and \lstinline|noisybiclique.txt| do not yield an improvement. Since \lstinline|clique.txt| is a clique of 5 vertices, any vertex cover must contain those 5 vertices, so this is expected. For \lstinline|noisybiclique.txt|, both solutions contain all vertices, but we are not sure if this is strictly necessary in any solution.
+Considering additionally the objective function value of the rounded solutions, we also see significant improvements for the formulation with triangle constraints over the original version. Apart from the instances above, only \lstinline|clique.txt| and \lstinline|noisybiclique.txt| do not yield an improvement. Since \lstinline|clique.txt| is a clique of 5 vertices, any vertex cover must contain those 5 vertices, so this is expected. For \lstinline|noisybiclique.txt|, both solutions contain all vertices, but we are not sure if this is strictly necessary in any solution.
 
-There are also several instances where we actually found the optimal solution. This is the case when the value of LP-relaxation matches the value of the rounded solution. For \lstinline|star.txt| this was the case for both the formulation with the triangle constraints and without. Furthermore, we also found the optimal solution for \lstinline|routes.txt|, \lstinline|cycles.txt|, and \lstinline|karate.txt| with the help of the additional constraints. 
+There are also several instances where we actually found the optimal solution. This is the case when the value of the LP-relaxation matches the value of the rounded solution. For \lstinline|star.txt| this was the case for both the formulation with the triangle constraints and without. Furthermore, we also found the optimal solution for \lstinline|routes.txt|, \lstinline|cycles.txt|, and \lstinline|karate.txt| with the help of the additional constraints. 
 
-As an example where the additional constraints significantly improved the solution (and actually enabled us to find the optimal solution), was \lstinline|routes.txt|, shown in Figure~\ref{fig:routes}. We can see that it contains a lot of triangles, thus a lot of triangle constraints were added.
+As an example where the additional constraints significantly improved the solution (and actually enabled us to find the optimal solution), was \lstinline|routes.txt|. The graph itself has a lot of triangles, thus lots of triangle constraints come into play. In Figure~\ref{fig:routes}, we see the solution of the LP relaxation and the rounded solution without the triangle constraints. Observe that all variables have a value of $0.5$, thus in the rounded solution we choose all vertices of the graph. In Figure~\ref{fig:routes_t}, we see the solution obtained with the triangle constraints. Therefore we can not have $0.5$ for all variables anymore, as this would violate the triangle constraints. Instead, for this instance, the variables in the LP-relaxation have either a value of $0$ or $1$. Consequently, the solution is automatically an optimal solution for the IP as well. Subsequently, the rounded solution is identical to the solution obtained by the LP-relaxation.
 
 \begin{figure}
     \centering
-    \includegraphics[width=.8\linewidth]{Assignment4/routes.pdf}
-    \caption{Visualization of the graph \lstinline|routes.txt|}
+    \includegraphics[page=1]{Assignment4/graphics.pdf}
+    \caption{Solution for \lstinline|routes.txt| without triangle constraints}
     \label{fig:routes}
 \end{figure}
 
-\begin{lstlisting}
-Without triangle constraints:
-	- Solution: {'JFK': 0.5, 'MCO': 0.5, 'ATL': 0.5, 'ORD': 0.5, 'HOU': 0.5, 'DEN': 0.5, 'DFW': 0.5, 'PHX': 0.5, 'LAS': 0.5, 'LAX': 0.5}
-	- Rounded: {'JFK': 1, 'MCO': 1, 'ATL': 1, 'ORD': 1, 'HOU': 1, 'DEN': 1, 'DFW': 1, 'PHX': 1, 'LAS': 1, 'LAX': 1}
-With triangle constraints:
-	- Solution: {'JFK': 0.0, 'MCO': 1.0, 'ATL': 1.0, 'ORD': 1.0, 'HOU': 0.0, 'DEN': -0.0, 'DFW': 1.0, 'PHX': 1.0, 'LAS': 1.0, 'LAX': 0.0}
-	- Rounded: {'JFK': 0, 'MCO': 1, 'ATL': 1, 'ORD': 1, 'HOU': 0, 'DEN': 0, 'DFW': 1, 'PHX': 1, 'LAS': 1, 'LAX': 0}
-
-\end{lstlisting}
-
-
+\begin{figure}
+    \centering
+    \includegraphics[page=2]{Assignment4/graphics.pdf}
+    \caption{Solution for \lstinline|routes.txt| with triangle constraints}
+    \label{fig:routes_t}
+\end{figure}
 
 
 
