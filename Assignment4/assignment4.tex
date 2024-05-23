@@ -183,7 +183,15 @@ Recall that the solution of the LP-relaxation of the integer program expressing 
     \end{tabular}
 \end{center}
 
-First, let us consider the obtained objective function values of the LP-relaxation with and without the triangle constraints, i.e.~lower bounds of the optimal solution. As expected, the formulation with the triangle constraints gives us a tighter lower bound as the formulation without them for almost all graphs. Only for \lstinline|petersen.txt|, \lstinline|petersenstar.txt|, and \lstinline|star.txt| there is no improvement. However, this is not surprising as neither of these graphs have any triangles. Thus, the LP formulations are identical and therefore, we obtain identical results.
+First, let us consider the obtained objective function values of the LP-relaxation with and without the triangle constraints, i.e.~lower bounds of the optimal solution. As expected, the formulation with the triangle constraints gives us a tighter lower bound than the formulation without them for almost all graphs. Only for \lstinline|petersen.txt|, \lstinline|petersenstar.txt|, and \lstinline|star.txt| there is no improvement. However, this is not surprising as neither of these graphs contain triangles. Thus, the LP formulations are identical and, therefore, we obtain identical results.
+
+Considering additionally the objective function value of the rounded solutions, we also see significant improvements for the formulation with triangle constraints over the original version. Apart from the instance above, only \lstinline|clique.txt| and \lstinline|noisybiclique.txt| do not yield an improvement. Since \lstinline|clique.txt| is a clique of 5 vertices, any vertex cover must contain those 5 vertices, so this is expected. For \lstinline|noisybiclique.txt|, both solutions contain all vertices, but we are not sure if this is strictly necessary in any solution.
+
+There are also several instances where we actually found the optimal solution. This is the case when the value of LP-relaxation matches the value of the rounded solution. For \lstinline|star.txt| this was the case for both the formulation with the triangle constraints and without. Furthermore, we also found the optimal solution for \lstinline|routes.txt|, \lstinline|cycles.txt|, and \lstinline|karate.txt| with the help of the additional constraints. 
+
+As an example where the additional constraints significantly improved the solution (and actually enabled us to find the optimal solution), was \lstinline|routes.txt|. Looking at the solution, 
+
+
 
 
 
