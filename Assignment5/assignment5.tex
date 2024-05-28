@@ -1,0 +1,190 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, mathtools}
+\usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage[ruled, linesnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{dsfont}
+\usepackage{pythonhighlight}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+
+% Define colors for syntax highlighting
+\definecolor{codegreen}{rgb}{0.2,0.6,0.2}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+% Sensible defaults for lstlistings
+\lstset{
+numberstyle=\tiny\color{codegray},
+backgroundcolor=\color{backcolour},   
+  basicstyle=\footnotesize\ttfamily,
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  commentstyle=\bfseries\color{purple!40!black}
+  frame=L,
+  identifierstyle=\color{blue},
+  keywordstyle=\bfseries\color{green!40!black},
+  language=python,
+  showstringspaces=false,
+  stringstyle=\color{orange},
+  xleftmargin=\parindent,
+  captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    framexleftmargin=16pt,
+    framextopmargin=6pt,
+        framexbottommargin=6pt, 
+        frame=tb, framerule=0pt,
+}
+
+
+\title{Approximation Algorithms - Assignment 5}
+\author{Group 2: Christoph Kern, Johannes Gabriel Sindlinger}
+
+
+\begin{document}
+
+\maketitle
+
+In the \emph{maximum directed cut problem} (sometimes called MAX DICUT) we are given as input a direct graph $G=(V,A)$. Each directed arc $(i,j) \in A$ has nonnegative weight $w_{ij} \ge 0$. The goal is to parition $V$ into two sets $U$ and $W = V - U$ so as to maximize the total weight of the arcs going from $U$ to $W$ (that is, arcs $(i,j)$ with $i \in U$ and $j \in W$).
+
+\section{Randomized $\frac{1}{4}$-Approximation Algorithm}
+
+We will use following extremely simple randomized algorithm to compute a solution for the MAX DICUT problem:
+\vspace{1em}
+
+\emph{Assign each vertex at random to $U$ or $W$, uniformly and independently.}
+\vspace{1em}
+
+For the analysis, we will use the indicator variables $Z_{ij}$ for all $i,j\in V$, s.t.:
+\[
+    Z_{ij} = \begin{cases}
+        1 & \text{if }i \in U\text{ and }j \in W\\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+We now analyse the expected total weight of the arcs going from $U$ to $W$ (which can be defined as $E \cap (U \times W)$):
+
+\begin{align}
+    \mathbb{E}\left[\sum_{(i,j) \in E \cap (U \times W)} w_{ij}\right]&=\mathbb{E}\left[\sum_{(i,j) \in E} w_{ij} Z_{ij}\right] \label{eq1:1}\\
+    &=\sum_{(i,j) \in E} w_{ij} \mathbb{E}\left[Z_{ij}\right] \label{eq1:2}\\
+    &=\sum_{(i,j) \in E} w_{ij} \cdot \text{Pr}(i \in U \text{ and } j \in W) \label{eq1:3}\\
+    &=\sum_{(i,j) \in E} w_{ij} \cdot \text{Pr}(i \in U) \cdot \text{Pr}(j \in W) \label{eq1:4}
+\end{align}
+\begin{align}
+    \quad\quad&=\sum_{(i,j) \in E} w_{ij} \cdot \frac{1}{2} \cdot \frac{1}{2} \label{eq1:5}\\
+    &=\frac{1}{4} \sum_{(i,j) \in E} w_{ij} \label{eq1:6}\\
+    &\ge\frac{1}{4} \text{OPT} \label{eq1:7}
+\end{align}
+
+Explanations of the individual steps:
+\begin{itemize}
+    \item Line~\ref{eq1:1}: Expressing the sum using the indicator variables
+    \item Line~\ref{eq1:2}: Applying linearity of expectation
+    \item Line~\ref{eq1:3}: Using the fact that the expected value of $Z_{ij}$ is equal to the probability that $i \in U$ and $j \in W$, for all $i,j \in V$.
+    \item Line~\ref{eq1:4}: Applying joint probability
+    \item Line~\ref{eq1:5}: Using the fact that for any vertex $i \in V$, the probability of it being assigned to $U$ is $50\%$. The same holds for $W$. 
+    \item Line~\ref{eq1:7}: Using the observation that the sum of weights over all edges is definitely larger than or equal to the optimal solution.
+\end{itemize}
+
+\section{Integer Program}
+
+The integer program which models MAX DICUT has two different types of variables, which encode the following properties:
+\begin{itemize}
+    \item $x_i$ for all $i \in V$:  
+    
+    If $x_i = 1$ then $i \in U$, and if $x_i = 0$ then $i \in W$
+
+    \item $z_{ij}$ for all $(i,j) \in A$: 
+    
+    $z_{ij} = 1$ if and only if $i \in U$ and $j \in W$, otherwise $z_{ij} = 0$
+\end{itemize}
+
+Note that although $z_{ij}$ for all $(i,j) \in A$ is not a boolean variable, it will only have the values $0$ or $1$ in any optimal solution of the IP (reasoning for this will be given later).
+
+The integer program is now defined as follows:
+\begin{align}
+    \quad\max \sum_{(i,j) \in A} &w_{ij}z_{ij} \label{eq2:1}\\
+    \quad\text{s.t.}\quad\quad z_{ij} &\le x_i &\forall(i,j) \in A,\quad\quad\label{eq2:2}\\
+    z_{ij} &\le 1 - x_j &\forall(i,j) \in A,\quad\quad\label{eq2:3}\\
+    x_i &\in \{0,1\} &\forall i \in V,\quad\quad\label{eq2:4}\\
+    0 &\le z_{ij} \le 1 &\forall(i,j) \in A.\quad\quad\label{eq2:5}
+\end{align}
+\newpage
+
+Explanations of the objective function and the individual constraints:
+\begin{itemize}
+    \item Line~\ref{eq2:1}: The objective is to maximize the total weight of the arcs going from $U$ to $W$. Thus, in the objective function of the IP, we want to sum up all the weights of all arcs $(i,j)$ where $i \in U$ and $j \in W$. We multiply the weight of each arc $(i,j)$ with the indicator variable $z_{ij}$ to ensure that we are only summing up the weights of arcs going from $U$ to $W$.
+    
+    \item Line~\ref{eq2:2}: These constraints ensure that for every arc $(i,j) \in A$, if $i \not \in U$ (which is the case if $x_i = 0$) then we do not count the arc $(i,j)$ in the objective function. Thus, the inequality ensures that $z_{ij} = 0$ in that case. 
+    
+    In the case that $i \in U$ ($x_i = 1$), then $z_{ij}$ will become $1$ if not restricted by any other constraints, as it being maximized also maximizes the objective function value.
+    
+    \item Line~\ref{eq2:3}: Similarly to the previous set of constraints from Line~\ref{eq2:2}, these constraints ensure that for every arc $(i,j) \in A$, if $j \not\in W$ (which is the case if $x_j = 1)$ then we do not count the arc $(i,j)$ in the objective function. Thus, the inequality ensures that $z_{ij} = 0$ in that case. 
+
+    In the case that $j \in W$ ($x_j = 0$), then $z_{ij}$ will become $1$ if not restricted by any other constraints, as it being maximized also maximizes the objective function value.
+
+    Together with the constraints of Line~\ref{eq2:2}, this ensures that for every arc $(i,j) \in A$, $z_{ij} = 0$ if $i \not\in U$ or $j \not\in W$. Thus, only in the case when $i \in U$ and $j \in W$ we have $z_{ij} = 1$. This corresponds to the expected behaviour.
+
+    \item Line~\ref{eq2:4}: Constraints restricting the domain of variables $x_i$ to $0$ and $1$ for all $i \in V$, indicating whether $i \in U$ ($x_i = 1$) or $i \in W$ ($x_i = 0$).
+
+    \item Line~\ref{eq2:5}: Domain constraints for $z_{ij}$ for every arc $(i,j) \in A$, although redundant, since in any optimal solution, $z_{ij}$ will want to be as large as possible to maximize the objective function value, but can be at most $0$ or $1$ as bounded by the constraints in Lines \ref{eq2:2} and \ref{eq2:3}.
+\end{itemize}
+
+\section{Randomized Rounding}
+
+We consider a randomized rounding algorithm for MAX DICUT that solves the LP-relaxation of the IP above and puts vertex $i \in U$ with probability $\frac{1}{4} + \frac{x_i}{2}$. We now analyse the expected total weight of the arcs going from $U$ to $W$ of the cut produced by this algorithm:
+
+\begin{align}
+    \mathbb{E}&\left[\sum_{(i,j) \in E \cap (U \times W)} w_{ij}\right]\label{eq3:1}\\
+     &=\sum_{(i,j) \in E} w_{ij} \cdot \text{Pr}(i \in U) \cdot \text{Pr}(j \in W)\label{eq3:2}
+\end{align}
+\begin{align}
+    \quad\quad\quad\quad&=\sum_{(i,j) \in E} w_{ij} \cdot \text{Pr}(i \in U) \cdot (1 - \text{Pr}(j \in U))\label{eq3:3}\\
+    &=\sum_{(i,j) \in E} w_{ij} \cdot \left(\frac{1}{4} + \frac{x_i^*}{2}\right) \cdot \left(1 - \left(\frac{1}{4} + \frac{x_j^*}{2}\right)\right)\label{eq3:4}\\
+    &=\sum_{(i,j) \in E} w_{ij} \cdot \left(\frac{1}{4} + \frac{x_i^*}{2}\right) \cdot \left(\frac{1}{4} + \frac{1 - x_j^*}{2}\right)\label{eq3:5}\\
+    &\ge\sum_{(i,j) \in E} w_{ij} \cdot \left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right) \cdot \left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right)\label{eq3:6}\\
+    &=\sum_{(i,j) \in E} w_{ij} \cdot \left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right)^2\label{eq3:7}\\
+    &\ge\sum_{(i,j) \in E} w_{ij} \cdot \frac{z_{ij}^*}{2}\label{eq3:8}\\
+    &=\frac{1}{2} \sum_{(i,j) \in E} w_{ij} z_{ij}^*\label{eq3:9}\\
+    &=\frac{1}{2} \text{OPT}_\text{LP}\label{eq3:10}\\
+    &\ge \frac{1}{2} \text{OPT}\label{eq3:11}
+\end{align}
+
+Explanations of the individual steps:
+\begin{itemize}
+    \item Line~\ref{eq3:2}: See Lines \ref{eq1:1} to \ref{eq1:4} from the analysis of the simple randomized algorithm. 
+    \item Line~\ref{eq3:3}: Applying the fact that $\text{Pr}(j \in W) = \text{Pr}(j \not \in U) = 1 - \text{Pr}(j \in U)$ for any $j \in V$.
+    \item Line~\ref{eq3:4}: Using $\text{Pr}(i \in U) = \frac{1}{4} + \frac{1}{x_i^*}$ for any $i \in V$, where $x_i^*$ is the value of variable $x_i$ of the optimal solution of the LP-relaxation.
+    \item Line~\ref{eq3:6}: Lower bounding $x_i^*$ and $1 - x_j^*$ with $z_{ij}^*$, where $z_{ij}^*$ is the value of variable $z_{ij}$ of the optimal solution of the LP-relaxation. This bound is a consequence of the constraints in Lines~\ref{eq2:2} and \ref{eq2:3}.
+    \item Line~\ref{eq3:8}: For this inequality to hold, we show that $\left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right)^2 \ge \frac{z_{ij}^*}{2}$ for any $(i,j) \in A$, or equivalently that $\left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right)^2 - \frac{z_{ij}^*}{2} \ge 0$:
+    \begin{align*}
+        \left(\frac{1}{4} + \frac{z_{ij}^*}{2}\right)^2 - \frac{z_{ij}^*}{2} &= \left(\frac{1}{4}\right)^2 + \frac{z_{ij}^*}{4} + \left(\frac{z_{ij}^*}{2}\right)^2 - \frac{z_{ij}^*}{2}\\
+        &= \left(\frac{1}{4}\right)^2 - \frac{z_{ij}^*}{4} + \left(\frac{z_{ij}^*}{2}\right)^2 = \left(\frac{1}{4} - \frac{z_{ij}^*}{2}\right)^2 \ge 0
+    \end{align*}
+    The last inequality holds since any real to the power of an even number is always larger than or equal to $0$. 
+    \item Line~\ref{eq3:10}: Using the fact that $\text{OPT}_\text{LP}$ corresponds to $\sum_{(i,j) \in E} w_{ij} z_{ij}^*$.
+    \item Line~\ref{eq3:11}: Applying the fact that $\text{OPT}_\text{LP}$ is larger than or equal to $\text{OPT}$ for maximization problems. 
+    
+\end{itemize}
+
+
+
+
+\end{document}
