@@ -1,0 +1,213 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts, mathtools}
+\usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage[ruled, linesnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{dsfont}
+\usepackage{pythonhighlight}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+
+% Define colors for syntax highlighting
+\definecolor{codegreen}{rgb}{0.2,0.6,0.2}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+% Sensible defaults for lstlistings
+\lstset{
+numberstyle=\tiny\color{codegray},
+backgroundcolor=\color{backcolour},   
+  basicstyle=\footnotesize\ttfamily,
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  commentstyle=\bfseries\color{purple!40!black}
+  frame=L,
+  identifierstyle=\color{blue},
+  keywordstyle=\bfseries\color{green!40!black},
+  language=python,
+  showstringspaces=false,
+  stringstyle=\color{orange},
+  xleftmargin=\parindent,
+  captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    framexleftmargin=16pt,
+    framextopmargin=6pt,
+        framexbottommargin=6pt, 
+        frame=tb, framerule=0pt,
+}
+
+
+\title{Approximation Algorithms - Assignment 6}
+\author{Group 2: Christoph Kern, Johannes Gabriel Sindlinger}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+    \textbf{Github-Link:} \\
+\url{https://github.com/chrisiKern/Approximation-Algorithms-2024/blob/main/Assignment6/Correlation_clustering_assignment.ipynb}
+\end{center}
+
+For this assignment, we are considering the \emph{correlation clustering} problem, defined as follows:
+\begin{quote}
+    \begin{description}
+        \item[Input:] Undirected graph $G=(V,E)$ with $|V| = n$, two edge weights $w_{ij}^+, w_{ij}^- \ge 0$ for each  $\{i,j\} \in E$.
+        \item[Goal:] A partition $\mathcal{P} = P_1 \cup \dots \cup P_k$ of $V$ which maximizes the total $w^+$ weight of edges inside the sets of the partition plus the total $w^-$ weight of edges between the sets of the partition, i.e.
+    \end{description}
+\end{quote}
+ \[
+    \sum_{\{i,j\} \in E(\mathcal{P})} w_{ij}^+ + \sum_{\{i,j\} \in E \setminus E(\mathcal{P})} w_{ij}^- \quad \text{ with } E(\mathcal{P}) = E \cap \bigcup\limits_{P_\ell \in \mathcal{P}} \{\{i,j\} \subseteq P_\ell \}
+\]
+\vspace{1em}
+
+The following vector program coincides with the relaxation of the correlation clustering problem (as found in section 6.4 in the book):
+
+\begin{align*}
+    \text{maximize }\sum_{\{i,j\} \in E} \left(w_{ij}^+(v_i\cdot v_j) + w_{ij}^-(1-v_i\cdot v_j) \right)\\
+    \text{s.t. }\quad\quad v_i\cdot v_i &= 1 & \forall i \in V\\
+    v_i\cdot v_j &\ge 0 & \forall i,j \in V\\
+    v_i &\in \mathbb{R}^n & \forall i \in V
+\end{align*}
+
+This problem can be equivalently expressed as following SDP:
+
+\begin{align*}
+    \text{maximize }\sum_{\{i,j\} \in E} \left(w_{ij}^+x_{ij} + w_{ij}^-(1-x_{ij}) \right)\\
+    \text{s.t. }\quad\quad x_{ii} &= 1 & \forall i \in V\\
+    x_{ij} &\ge 0 & \forall i,j \in V\\
+    X &\succeq 0
+\end{align*}
+
+In python, we construct and solve the above SDP as follows:
+\begin{lstlisting}
+correlation_clustering = pc.Problem()
+
+X = pc.SymmetricVariable('X',(n,n))
+W_p = pc.Constant('W_p', W_plus)
+W_m = pc.Constant('W_m', W_minus)
+ones = pc.Constant('ones', np.ones((n,n)))
+
+correlation_clustering.set_objective('max', (W_p | X) + (W_m | (ones - X)))
+correlation_clustering.add_constraint(pc.maindiag(X) == 1)
+correlation_clustering.add_constraint(X >= 0)
+correlation_clustering.add_constraint(X >> 0)
+
+correlation_clustering.solve(solver='cvxopt')
+V = cholesky(X.value + 1e-3 * np.identity(n))
+\end{lstlisting}
+
+\begin{itemize}
+    \item Line 1: Initialize optimization problem
+    \item Lines 3-6: Define variables and constants
+    \item Lines 8-11: Set objective and add constraints
+    \item Lines 13-14: Solve the SDP and extract vectors of the equivalent vector program formulation.
+\end{itemize}
+
+
+In code, we can determine the upper bound of OPT by reading the objective function value of the SDP:
+\begin{lstlisting}
+correlation_clustering.value
+\end{lstlisting}
+For the instance \texttt{denmark-0.6.txt}, we obtain an upper bound of $1629.86$.\vspace{1em}
+
+To compute the expected value of the objective function with a uniformly random 4-clustering, we introduce a indicator variable $Z_{ij}$, s.t.~for any $i,j \in V$
+\[
+    Z_{ij} = \begin{cases}
+        1 & \text{if } \exists P_\ell \in \mathcal{P} \text{ s.t. } i,j \in P_\ell\\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+In other words, $Z_{ij} = 1$ if vertex $i$ and $j$ are in the same cluster, otherwise $Z_{ij} = 0$. Observe that the probability of vertex $i$ and $j$ being in the same cluster is $\frac{1}{4}$ (having placed vertex $i$ in one of the 4 clusters, there is a $\frac{1}{4}$ chance that we also place $j$ in the same cluster). With this, we can determine the expected value of $Z_{ij}$:
+\[
+    \mathbb{E}[Z_{ij}] = \text{Pr}(\exists P_\ell \in \mathcal{P} \text{ s.t. }i,j \in P_\ell) = \frac{1}{4}
+\]
+By using the above observation and linearity of expectation, we can compute the expected value of the objective function as follows:
+
+\begin{align*}
+    \mathbb{E}&\left[ \sum_{\{i,j\} \in E(\mathcal{P})} w_{ij}^+ + \sum_{\{i,j\} \in E \setminus E(\mathcal{P})} w_{ij}^-\right]\\
+    &= \mathbb{E}\left[ \sum_{\{i,j\} \in E} w_{ij}^+ Z_{ij} + \sum_{\{i,j\} \in E} w_{ij}^- (1 - Z_{ij})\right]\\
+    &= \sum_{\{i,j\} \in E} w_{ij}^+ \mathbb{E}[Z_{ij}] + \sum_{\{i,j\} \in E} w_{ij}^- (1 - \mathbb{E}[Z_{ij}])\\
+    &= \frac{1}{4}\sum_{\{i,j\} \in E} w_{ij}^+ + \frac{3}{4}\sum_{\{i,j\} \in E} w_{ij}^-
+\end{align*}
+
+In code, this corresponds to following computation:
+\begin{lstlisting}
+1/4 * np.sum(W_plus) + 3/4 * np.sum(W_minus)
+\end{lstlisting}
+For the instance \texttt{denmark-0.6.txt}, we obtain an expected value of $1520.01$.\vspace{1em}
+
+We use randomized rounding on the above SDP to find a 4-clustering. We partition the vertices into 4 sets by separating the hyperspace using two independent random hyperplanes $r_1, r_2 \in \mathbb{R}^n$, i.e.
+\begin{align*}
+    P_1 &= \{i \in V\ |\ r_1 \cdot v_i \ge 0,\ r_2 \cdot v_i \ge 0 \}\quad P_2 = \{i \in V\ |\ r_1 \cdot v_i \ge 0,\ r_2 \cdot v_i < 0 \}\\
+    P_3 &= \{i \in V\ |\ r_1 \cdot v_i < 0,\ r_2 \cdot v_i \ge 0 \}\quad P_4 = \{i \in V\ |\ r_1 \cdot v_i < 0,\ r_2 \cdot v_i < 0 \}
+\end{align*}
+In code, we compute random partitions and evaluate their weight as follows:
+
+\begin{lstlisting}
+partition_weights = []
+partitions = []
+repetitions = 10**5
+
+for _ in range(repetitions):
+  R = np.random.normal(size = (2, n))
+  R_dot_V = np.dot(R, V)
+  
+  P = [(R_dot_V[0] >= 0) * (R_dot_V[1] >= 0), 
+       (R_dot_V[0] >= 0) * (R_dot_V[1] < 0), 
+       (R_dot_V[0] < 0) * (R_dot_V[1] >= 0),
+       (R_dot_V[0] < 0) * (R_dot_V[1] < 0)]
+  
+  partitions.append([np.array(words)[c] for c in P])
+  
+  plus_edges = np.sum([np.outer(c, c) for c in P], axis=0)
+  minus_edges = 1 - plus_edges  
+  
+  partition_weights.append(np.sum(W_plus * plus_edges + W_minus * minus_edges))
+\end{lstlisting}
+
+\begin{itemize}
+    \item Lines 1-5: As we repeat the randomized rounding procedure multiple times (Monte Carlo Algorithm), we define the number of repetitions (\lstinline|repetitions|) and initialize variables to store the weights (\lstinline|partition_weights|) of the resulting partitions and the actual partitions of the words (\lstinline|partitions|).
+    \item Lines 6-7: We compute two independent random hyperplanes and the dot product between the hyperplanes and the vectors.
+    \item Lines 9-12: Using the above computed dot product, we compute the four partitions and store each cluster as a boolean array.
+    \item Line 14: We compute the words in each cluster and add them to \lstinline|partitions|.
+    \item Lines 16-17: We determine the edges that are inside the sets of the partition (\lstinline|plus_edges|) using the outer product of each cluster's boolean array with itself. Note that we assume that the graph is a complete graph. Furthermore, we compute the edges that are between the sets of the partition (\lstinline|minus_edges|), which are just all edges outside of \lstinline|plus_edges|.
+    \item Line 19: We compute the total weight of the resulting partition and add it to \lstinline|partition_weights|.
+\end{itemize}
+
+Using \lstinline|max| as well as \lstinline|np.argmax| we can extract the weight of the best partition and its corresponding clusters of words from \lstinline|partition_weights| and \lstinline|partitions|. For the instance \texttt{denmark-0.6.txt}, we obtained in one run an objective function value of $1623.07$ for following partition:
+\begin{itemize}
+    \item Cluster 1: \texttt{'brisbane' 'newcastle' 'melbourne' 'nz' 'australia' 'wales' 'london'
+ 'sydney' 'cardiff' 'england'}
+    \item Cluster 2: \texttt{'switzerland' 'belgium' 'finland' 'slovakia' \\'holland' 'zealand' 'russia'
+ 'bulgaria' 'czech' 'serbia' \\'denmark' 'austria' 'lithuania' 'germany'
+ 'slovenia' 'italy' \\'norway' 'ireland' 'croatia' 'brazil' 'spain' 'greece'
+ \\'sweden' 'netherlands' 'latvia' 'romania' 'poland' 'europe' \\'hungary'
+ 'iceland' 'belarus' 'azerbaijan' 'kazakhstan' \\'estonia' 'morocco'}
+\end{itemize}
+
+
+
+
+
+
+
+\end{document}
