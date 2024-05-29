@@ -155,7 +155,7 @@ In code, this corresponds to following computation:
 \end{lstlisting}
 For the instance \texttt{denmark-0.6.txt}, we obtain an expected value of $1520.01$.\vspace{1em}
 
-We use randomized rounding on the above SDP to find a 4-clustering. We partition the vertices into 4 sets by separating the hyperspace using two independent random hyperplanes $r_1, r_2 \in \mathbb{R}^n$, i.e.
+We now use randomized rounding on the above SDP to find a 4-clustering. We partition the vertices into 4 sets by separating the hyperspace using two independent random hyperplanes $r_1, r_2 \in \mathbb{R}^n$, i.e.
 \begin{align*}
     P_1 &= \{i \in V\ |\ r_1 \cdot v_i \ge 0,\ r_2 \cdot v_i \ge 0 \}\quad P_2 = \{i \in V\ |\ r_1 \cdot v_i \ge 0,\ r_2 \cdot v_i < 0 \}\\
     P_3 &= \{i \in V\ |\ r_1 \cdot v_i < 0,\ r_2 \cdot v_i \ge 0 \}\quad P_4 = \{i \in V\ |\ r_1 \cdot v_i < 0,\ r_2 \cdot v_i < 0 \}
@@ -193,7 +193,7 @@ for _ in range(repetitions):
     \item Line 19: We compute the total weight of the resulting partition and add it to \lstinline|partition_weights|.
 \end{itemize}
 
-Using \lstinline|max| as well as \lstinline|np.argmax| we can extract the weight of the best partition and its corresponding clusters of words from \lstinline|partition_weights| and \lstinline|partitions|. For the instance \texttt{denmark-0.6.txt}, we obtained in one run an objective function value of $1623.07$ for following partition:
+Using \lstinline|max| as well as \lstinline|np.argmax| we can extract the weight of the best partition and its corresponding clusters of words from \lstinline|partition_weights| and \lstinline|partitions|. For the instance \texttt{denmark-0.6.txt}, we obtained in our run an objective function value of $1623.07$ for following partition:
 \begin{itemize}
     \item Cluster 1: \texttt{'brisbane' 'newcastle' 'melbourne' 'nz' 'australia' 'wales' 'london'
  'sydney' 'cardiff' 'england'}
@@ -202,6 +202,8 @@ Using \lstinline|max| as well as \lstinline|np.argmax| we can extract the weight
  'slovenia' 'italy' \\'norway' 'ireland' 'croatia' 'brazil' 'spain' 'greece'
  \\'sweden' 'netherlands' 'latvia' 'romania' 'poland' 'europe' \\'hungary'
  'iceland' 'belarus' 'azerbaijan' 'kazakhstan' \\'estonia' 'morocco'}
+    \item Cluster 3: \texttt{'netherland' 'englan'}
+    \item Cluster 4: \texttt{'belanda' 'jerman' 'thailand' 'portugal'}
 \end{itemize}
 
 
